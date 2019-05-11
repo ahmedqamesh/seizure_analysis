@@ -33,26 +33,38 @@ from matplotlib.patches import Rectangle
 from matplotlib.collections import PatchCollection
 import matplotlib.patches as patches
 import pylab as P
+from matplotlib import animation
 import pandas as pd
 from hrvanalysis import plot_poincare
+from matplotlib.animation import FuncAnimation
+from matplotlib import animation, rc
+from IPython.display import HTML, Image
+from numpy.lib.stride_tricks import as_strided
+from matplotlib.pyplot import xticks
+# equivalent to rcParams['animation.html'] = 'html5'
+rc('animation', html='html5')
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - [%(levelname)-8s] (%(threadName)-10s) %(message)s")
 PdfPages = PdfPages('results/monikit_results'+'.pdf')
 
-def read_data(file,window=False):
+def read_data(file):
     """
     reading the data files for RR intervals
     """
     data = pd.read_csv(file, delimiter=",", header=0)
     x = data["time_in_ms"] 
-    #Define a timewindow based on the period
-    if window:
-        x2=x[0]+window*1000
-        filtered_data = data[data.time_in_ms < x2 ]
-        x = filtered_data["time_in_ms"]
-        y = filtered_data["rr_in_ms"]
-    else:
-        y = data["rr_in_ms"]
+    y = data["rr_in_ms"]
     return x,y
+
+def read_seizures(file):
+    """
+    reading the seizures files
+    """
+    data = pd.read_csv(file, delimiter=",", header=0)
+    classification = data["classification"]
+    eeg_onset_secs= data["eeg_onset_secs"]
+    print (classification,eeg_onset_secs)
+    return classification,eeg_onset_secs
 
 def timeS2Poincare(rr_intervals,ndelay=1):
     ax1 = rr_intervals[:-ndelay]
@@ -94,6 +106,7 @@ def plot_timeseries_data(x,y,path=None,xlabel=None,ylabel=None,output=None,title
     """
     The function plots the timeseries
     """
+    style.use("seaborn-darkgrid")
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.plot(x, y)
@@ -113,6 +126,7 @@ def plot_distributions(rr_intervals,output=None,path=None,bin_size=100,title="Di
     rr_intervals: list
         list of Normal to Normal Interval.
     """
+    style.use("seaborn-darkgrid")
     fig = plt.figure()
     ax = fig.add_subplot(111)
     plt.title(title, fontsize=12)
@@ -138,7 +152,7 @@ def plot_Poincare(rr_intervals,xlabel=None,ylabel=None,title="Poincaré Plot",ou
     rr_intervals:List
     """
     x,y = timeS2Poincare(rr_intervals)
-    
+    style.use("seaborn-darkgrid")
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.scatter(x,y,c='r', s=2)
@@ -163,40 +177,88 @@ def plot_Poincare(rr_intervals,xlabel=None,ylabel=None,title="Poincaré Plot",ou
     ax.set_ylabel(ylabel)
     plt.savefig(path+ output + ".png", bbox_inches='tight')
     PdfPages.savefig()
+        
+def plot_rolling_window_features(data1,data2,xlabel=None,ylabel=None,title="Poincaré Plot",output=None,path=None):
+    
+    style.use("seaborn-darkgrid") 
+    ticks = np.arange(0,len(data1),len(data1)/8)
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax1 = data1["rr_in_ms"].plot(x="Time [ms]",legend=True,label="Mean",rot=45,title ="Data with window size of 30s (overlapping 5s)")
+    ax2 = data2["rr_in_ms"].plot(secondary_y=True,legend=True,label="Std",rot=45)
+    ax.set_ylabel("Mean")
+    mean_mean=np.mean(data1["rr_in_ms"])
+    mean_std=np.mean(data2["rr_in_ms"])
+    ax.text(0.80, 0.80, "mean= %.3f\n std=%.3f" % (mean_mean,mean_std),
+        horizontalalignment='right', verticalalignment='top', transform=ax.transAxes,
+        bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.7)) 
+    ax.right_ax.set_ylabel('Std')
+    ax.set_xlabel("Time [ms]")
+    plt.tight_layout()
+    plt.savefig(path+ output + ".png", bbox_inches='tight')
+    PdfPages.savefig() 
+    
+def windows_overlap(d, w, t):  
+    """
+    The function returns a new dataframe with overlapping
+    Arguments
+    ---------
+    d: dataframe (list of data)
+    w: window size(eg. 30 sec) 
+    t: overlapping factor (eg. 5sec of window size 30 sec).
+    """
+    r = np.arange(len(d))   
+    s = r[::t]   
+    z = list(zip(s, s + w))   
+    f = '{0[0]}:{0[1]}'.format
+    g = lambda t: d.iloc[t[0]:t[1]]   
+    return pd.concat(map(g, z), keys=map(f, z)) 
 
+#plot_data_animation()
+def get_rolling_window_features(file,time_winow=30,overlap=5):
+    """
+    reading the data files for RR intervals.
+    Arguments
+    ---------
+    time:time series
+    data: data collected for rr_intervals_list
+    """
+    # Reshape the data with window size and overlapping.
+    data = pd.read_csv(file, delimiter=",", header=0)
+    overlapped_data=windows_overlap(data,time_winow*1000,overlap*1000)
+    rolled_window_mean=overlapped_data.rolling(time_winow*1000).mean()
+    rolled_window_std=overlapped_data.rolling(time_winow*1000).std()
+    # plot the data after window
+    return rolled_window_mean, rolled_window_std, overlapped_data
+  
+# """
+# Question 1
+# """
+# #loading  data from the file data.csv
+# x,rr_intervals_list =read_data(file='data/data.csv') 
+# """
+# Question 2
+# """
+#  #Calculate statistics(a)
+# plot_distributions(rr_intervals_list,
+#                     output='2.a_distribution', path='results/')
+#  #plotting showPoincare plot with csi (b)
+# plot_Poincare(rr_intervals_list,xlabel='RRn[ms]',ylabel='RRn+1[ms]',
+#                output='2.b_Poincare',path='results/')
+# """
+# Question 3
+# """
+# #loading  data from the file data.csv with a window size of 30 seconds
+# rolled_window_mean, rolled_window_std,overlapped_data = get_rolling_window_features(file='data/data.csv')
+# plot_rolling_window_features(rolled_window_mean, rolled_window_std,output='3.data_features_30sec', path='results/')
+# 
+# #plotting showPoincare plot with csi (b)
+# plot_Poincare(overlapped_data["rr_in_ms"],xlabel='RRn[ms]',ylabel='RRn+1[ms]',title="Poincaré Plot (Window size of 30 sec)",
+#               output='3.b_Poincare_30sec',path='results/')
+# 
+# PdfPages.close()
+"""
+Question 4
+"""
+read_seizures(file='data/seizures.csv') 
 
-"""
-Question 1
-"""
-#loading  data from the file data.csv
-x,rr_intervals_list =read_data(file='data/data.csv')
-#plotting data
-plot_timeseries_data(x,rr_intervals_list,xlabel='time [ms]',ylabel='RR interval[ms]',
-                     output='1.data', path='results/')
-
-"""
-Question 2
-"""
-
-#Calculate statistics(a)
-plot_distributions(rr_intervals_list,
-                   output='2.a_distribution', path='results/')
-#plotting showPoincare plot with csi (b)
-plot_Poincare(rr_intervals_list,xlabel='RRn[ms]',ylabel='RRn+1[ms]',
-              output='2.b_Poincare',path='results/')
-"""
-Question 3
-"""
-#loading  data from the file data.csv with a window size of 30 seconds
-x2,rr_intervals_list2 =read_data(file='data/data.csv',window=30)
-#plotting data of 30 seconds window
-plot_timeseries_data(x2,rr_intervals_list2,xlabel='time [ms]',ylabel='RR interval[ms]',
-                     output='3.data_30sec', path='results/',
-                     title="Rr Interval time series in 30 sec window")
-#Calculate statistics(a)
-plot_distributions(rr_intervals_list2,title="Distribution of RR Intervals (Window size of 30 sec)",
-                   output='3.a_distribution_30sec', path='results/',bin_size=10)
-#plotting showPoincare plot with csi (b)
-plot_Poincare(rr_intervals_list2,xlabel='RRn[ms]',ylabel='RRn+1[ms]',title="Poincaré Plot (Window size of 30 sec)",
-              output='3.b_Poincare_30sec',path='results/')
-PdfPages.close()
