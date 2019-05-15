@@ -22,7 +22,6 @@ from matplotlib import style
 from matplotlib.patches import Ellipse
 from matplotlib import pyplot as p
 from mpl_toolkits.mplot3d import Axes3D    # @UnusedImport
-from math import pi, cos, sin
 import logging
 import os
 import time
