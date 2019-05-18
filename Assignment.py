@@ -21,7 +21,6 @@ import tables as tb
 from matplotlib import style
 from matplotlib.patches import Ellipse
 from matplotlib import pyplot as p
-from mpl_toolkits.mplot3d import Axes3D    # @UnusedImport
 import logging
 import os
 import time
@@ -125,7 +124,6 @@ def get_rolling_window_features(file,time_winow=30,overlap=5):
     overlapped_data=windows_overlap(data,time_winow*1000,overlap*1000)
     rolled_window_mean=overlapped_data.rolling(time_winow*1000).mean()
     rolled_window_std=overlapped_data.rolling(time_winow*1000).std()
-    #plot the data after window
     return rolled_window_mean, rolled_window_std, overlapped_data
     
 def windows_overlap(d, w, t):  
@@ -179,8 +177,8 @@ def get_csi_overlap(file,time_winow=30,overlap=5):
     
     for i in range(0,len(rr_in_ms),time_winow*1000):
         rr_in_ms_chunk =rr_in_ms[i:i+time_winow*1000]
-        time_in_chunk_ms =np.append(time_in_chunk_ms,i+time_winow)  
         csi_overlapped =np.append(csi_overlapped,get_csi_feature(rr_in_ms_chunk))
+        time_in_chunk_ms =np.append(time_in_chunk_ms,i+time_winow*1000)
     return csi_overlapped, time_in_chunk_ms
 
 def analyse_seizures(seizures_file="data/seizures.csv",data_file='data/data.csv',interval=10000):
@@ -221,13 +219,13 @@ def analyse_seizures(seizures_file="data/seizures.csv",data_file='data/data.csv'
         eeg_onset_array = np.append(eeg_onset_array, eeg_onset_secs[index])
         plot_timeseries_data_seizures(x, rr_intervals_list, path='results/', xlabel="Time [ms]",
                                        ylabel="RR interval [ms]", output="4.data_"+str(index+1)+"seizure",
-                                       title="Rr interval time series",scale=1000, classification= seizure_classification, 
+                                       title="RR interval time series",scale=1000, classification= seizure_classification, 
                                        eeg_onset_secs=eeg*1000,index=index+1, csi=csi, mean_rri=mean_rri,std_rri=std_rri)
         index += 1
     return mean_array, std_array, csi_array,classification_array,eeg_onset_array
 
 
-def plot_timeseries_data_seizures(x,y,path=None,xlabel=None,ylabel=None,output=None,title="Rr Interval time series",
+def plot_timeseries_data_seizures(x,y,path=None,xlabel=None,ylabel=None,output=None,title="RR Interval time series",
                          add_seizures=False,scale=1000,classification=None,eeg_onset_secs=None,index=None,csi=None, mean_rri=None,std_rri=None):
     """
     The function plots the timeseries around each seizure
@@ -248,7 +246,7 @@ def plot_timeseries_data_seizures(x,y,path=None,xlabel=None,ylabel=None,output=N
     plt.savefig(path+ output +".png", bbox_inches='tight')
     PdfPages.savefig()
     
-def plot_timeseries_data(x,y,path=None,xlabel=None,ylabel=None,output=None,title="Rr Interval time series",
+def plot_timeseries_data(x,y,path=None,xlabel=None,ylabel=None,output=None,title="RR Interval time series",
                          add_seizures=False,scale=1000,classification=False,):
     """
     The function plots the timeseries
@@ -371,47 +369,38 @@ def plot_rolling_window_features(data1,data2,xlabel=None,ylabel=None,
     plt.savefig(path+ output + ".png", bbox_inches='tight')
     PdfPages.savefig()
         
-"""
-   Question 1
-"""
-logger.info('######################[Question 1]#####################################')
+        
+logger.info('######################[Task 1]#####################################')
    #loading  data from the file data.csv
 x,rr_intervals_list =read_data(data_file='data/data.csv') 
    #plotting  data from the file data.csv
-plot_timeseries_data(x,rr_intervals_list,path='results/',xlabel="Time [ms]",ylabel="RR interval [ms]",output="1.data",title="Rr interval time series")
-
-"""
-Question 2
-"""
-logger.info('######################[Question 2]#####################################')
+plot_timeseries_data(x,rr_intervals_list,path='results/',xlabel="Time [ms]",ylabel="RR interval [ms]",output="1.data",title="RR interval time series")
+ 
+logger.info('######################[Task 2]#####################################')
  #Calculate statistics(a)
 plot_distributions(rr_intervals_list, output='2.a_distribution', path='results/')
 #plotting showPoincare plot with csi (b)
 plot_Poincare(rr_intervals_list,xlabel='RRn[ms]',ylabel='RRn+1[ms]',
                 output='2.b_Poincare',path='results/')
-"""
- Question 3
-"""
-logger.info('######################[Question 3]#####################################')
+
+logger.info('######################[Task 3]#####################################')
  #Calculating the features on the data within a time window of 30s and ovelapping of 5s
 rolled_window_mean, rolled_window_std,overlapped_data = get_rolling_window_features(file='data/data.csv',time_winow=30,overlap=5)
-
+ 
 #Calculating csi (b) for a time window of 30s and ovelapping of 5s
 plot_rolling_window_features(rolled_window_mean, rolled_window_std,output='3.data_features_30sec', path='results/',time_winow=30,overlap=5) 
-
-csi_overlapped, time_in_chunk_sec = get_csi_overlap('data/data.csv')
+ 
+csi_overlapped, time_in_chunk_ms = get_csi_overlap('data/data.csv')
 #Plotting csi (b) for a time window of 30s and ovelapping of 5s
-plot_timeseries_data(time_in_chunk_sec,csi_overlapped,path='results/',xlabel="Time [ms]",add_seizures=False,scale=1,
+plot_timeseries_data(time_in_chunk_ms,csi_overlapped,path='results/',xlabel="Time [ms]",add_seizures=False,scale=1,
                       ylabel="Cardiac Sympathetic Index(CSI)",output="3.data_csi_30sec",title="CSI for data with window size of 30s (overlapping 5s)")
-"""
- Question 4
- """
-logger.info('######################[Question 4]#####################################')
+ 
+logger.info('######################[Task 4]#####################################')
    #plotting  data and the corresponfing seizures
 plot_timeseries_data(x,rr_intervals_list,path='results/',xlabel="Time [ms]",ylabel="RR interval [ms]",output="4.seizures_data",
-                     title="Rr interval time series [The red lines represent the seizures]",add_seizures=True,scale=1000)
+                     title="RR interval time series [The red lines represent the seizures]",add_seizures=True,scale=1000)
 #Calculating the features on the data arround each seizure
-mean_array, std_array, csi_array,classification, eeg_onset_array= analyse_seizures(seizures_file="data/seizures.csv",data_file='data/data.csv',interval=50000)
+mean_array, std_array, csi_array,classification, eeg_onset_array= analyse_seizures(seizures_file="data/seizures.csv",data_file='data/data.csv',interval=30000)
 #plotting the features on the data arround each seizure
 plot_seizure_features(mean_array, std_array, csi_array,output='4.seizure_features',path='results/',classification=classification,eeg_onset_array=eeg_onset_array,interval=50000)
 PdfPages.close()
