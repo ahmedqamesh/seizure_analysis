@@ -12,6 +12,8 @@
     For more information, check: monikit Assignment Data Scientist.pdf
 '''
 from __future__ import division
+# import matplotlib
+# matplotlib.use('Qt5Agg')
 from numpy import loadtxt, arange, append
 import matplotlib.pyplot as plt
 import numpy as np
