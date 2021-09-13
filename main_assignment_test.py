@@ -244,6 +244,7 @@ def plot_timeseries_data_seizures(x,y,path=None,xlabel=None,ylabel=None,output=N
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     plt.title(title)
+    plt.close()
     plt.tight_layout()
     plt.savefig(path+ output +".png", bbox_inches='tight')
     PdfPages.savefig()
