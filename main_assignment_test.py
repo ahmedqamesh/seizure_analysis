@@ -8,8 +8,8 @@
 '''
     Script to solve Assignment  “First insights in the data”
     for the Full-Time-Position Data Scientist
-    at monikit
-    For more information, check: monikit Assignment Data Scientist.pdf
+    at 
+    For more information, check:  Assignment Data Scientist.pdf
 '''
 from __future__ import division
 # import matplotlib
@@ -37,7 +37,7 @@ from matplotlib.pyplot import xticks
 from matplotlib import gridspec
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - [%(levelname)-8s] (%(threadName)-10s) %(message)s")
 logger = logging.getLogger(__name__)
-PdfPages = PdfPages('results/monikit_results'+'.pdf')
+PdfPages = PdfPages('results/final_results'+'.pdf')
 
 def read_data(data_file):
     """
