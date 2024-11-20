@@ -27,7 +27,7 @@ The approach involves the following steps:
 ## Installation and Usage
 1. **Clone Repository**: Clone the repository to obtain the source code.
 ```
-git clone git@github.com:ahmedqamesh/monikit_assignment.git
+git clone git@github.com:ahmedqamesh/seizure_analysis.git
 ```
 
 2. **Dependencies**: Install required dependencies using pip.
