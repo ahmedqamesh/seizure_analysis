@@ -1,4 +1,4 @@
-# ECG Signal Analysis for Seizure Detection
+# About the Project
 
 ## Introduction
 This script focuses on analyzing RR intervals derived from ECG signals to detect epileptic seizures. RR intervals represent the time intervals between successive R-peaks, which correspond to individual heartbeats. By studying variations in RR intervals, we aim to identify patterns associated with epileptic seizures.
