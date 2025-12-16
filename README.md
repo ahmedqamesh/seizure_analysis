@@ -36,7 +36,7 @@ pip install hrvanalysis
 ```
 3. **Run the Code**: Execute the main script to perform ECG signal analysis and seizure detection.
 ```
-python main_assignment_test.py
+python main_test.py
 ```
 
 ### Description of the data file:
