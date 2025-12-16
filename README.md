@@ -2,7 +2,7 @@
 <img width="1536" height="1024" alt="seizure_analysis" src="https://github.com/user-attachments/assets/6a329143-7687-4aaa-80f5-b48bb6234e92" />
 
 ## Introduction
-This script focuses on analyzing RR intervals derived from ECG signals to detect epileptic seizures. RR intervals represent the time intervals between successive R-peaks, which correspond to individual heartbeats. By studying variations in RR intervals, we aim to identify patterns associated with epileptic seizures.
+This package focuses on analyzing RR intervals derived from ECG signals to detect epileptic seizures. RR intervals represent the time intervals between successive R-peaks, which correspond to individual heartbeats. By studying variations in RR intervals, we aim to identify patterns associated with epileptic seizures.
 
 ## Project Objective
 The primary objective of this project is to develop algorithms for automated seizure detection based on ECG signal analysis. By detecting specific patterns in RR interval variations indicative of seizure events, we aim to create reliable tools for seizure prediction and monitoring.
